@@ -9,7 +9,8 @@
 #include "utils/json.hpp"
 #include "../toolEquipped.hpp"
 #include "exception.hpp"
-// #define jsonStr2Int(v) atoi(v.asCString())
+#include "loadToolEquipped.hpp"
+
 CookAbility Chef::globalAbilityBuff;
 int Chef::globalAbilityMale = 0;
 int Chef::globalAbilityFemale = 0;
@@ -92,9 +93,27 @@ void loadChef(CList &chefList) {
             }
         }
     }
+
+#ifdef _WIN32
+    auto t = loadToolFile();
+    if (t == EMPTY_FILE__NOT_EQUIPPED) {
+        std::cout << "toolEquipped.csv没有设定规则。允许所有厨师装备厨具。"
+                  << std::endl;
+    } else if (t == NO_FILE__NO_TOOL) {
+        std::cout << "未找到toolEquipped.csv文件。不会装配任何厨具。"
+                  << std::endl;
+    } else {
+        std::cout << "toolEquipped.csv文件已加载。" << std::endl;
+    }
+    for (auto &chef : chefList) {
+        loadToolFromFile(&chef, t);
+    }
+#endif
+#ifdef __linux__
     for (auto &chef : chefList) {
         toolEquipped(&chef);
     }
+#endif
 }
 /**
  * Chef
